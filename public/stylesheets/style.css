@@ -1,0 +1,76 @@
+body {
+  /*padding: 50px;*/
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+h1 {
+  color: white;
+}
+
+p {
+  color: white;
+}
+
+#field, #musicArrayTable {
+  margin-left: auto;
+  margin-right: auto;
+}
+#field td {
+  border: 1px solid black;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  text-align: center;
+  vertical-align: middle;
+  table-layout: fixed;
+  padding: 1px 1px 1px 1px;
+  border-collapse: collapse;
+}
+#musicArrayTable td {
+  border: 1px solid black;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  text-align: center;
+  vertical-align: middle;
+  table-layout: fixed;
+  padding: 1px 1px 1px 1px;
+  border-collapse: collapse;
+}
+
+.modal{
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content{
+  background-color: white;
+  width: 500px;
+  margin: 20% auto;
+}
+
+.boxA{
+  text-align: center;
+}
+.box1, .box2 {
+  /*width: 40%;*/
+  margin: 5% 5%;
+  /*float: left;*/
+  background-color: #333;
+}
+
+.sttr {
+  background-color: white;
+  margin: 30px;
+}

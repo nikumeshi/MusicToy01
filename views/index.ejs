@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+
+
+<div class="boxA">
+<div class="box1">
+  <h1>１小節を作る</h1>
+
+  <p>
+    bpm = <input type="text" id="bpm" size="4" value="120" min="0" max="300">
+    <button onclick="start()">スタート</button>
+<!--    <button onclick="stop()">stop</button>-->
+    <button onclick="save()">保存</button>
+  </p>
+
+  <table id="field">
+    <tr id="tr0"></tr>
+    <tr id="tr1"></tr>
+    <tr id="tr2"></tr>
+    <tr id="tr3"></tr>
+  </table>
+
+  <!-- modal -->
+  <div id="saveModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-body">
+        <h2>小節を保存する</h2>
+        <form action="" method="post" >
+          タイトル : <input type="text" id="title1" name="title" value="<%=defaultTitle%>" required>
+          <input type="hidden" id="score" name="score" value=""><br>
+          <input type="submit" id="saveBtn" value="保存">
+          <button type="button" id="cancelBtn" onclick="cBtn()">キャンセル</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const save = ()=>{
+    const s = document.getElementById('saveModal');
+    s.style.display = 'block';
+    const score = document.getElementById('score');
+    score.value = getNoteArray().toString();
+  }
+  const sBtn = document.getElementById('saveBtn');
+  sBtn.addEventListener("click", function () {
+    const target = document.getElementById('saveModal');
+    target.style.display = 'none';
+  });
+
+  function getNoteArray(){return noteArray}
+
+  const cBtn = ()=>{
+    const target = document.getElementById('saveModal');
+    target.style.display = 'none';
+    document.getElementById('title1').value = "notitle";
+  }
+
+</script>
+
+<div class="box2">
+  <h1>小節を並べる</h1>
+  <p>
+    bpm = <input type="text" id="bpm2" size="4" value="120">
+    <button onclick="start2()">スタート</button>
+<!--    <button onclick="stop()">stop</button>-->
+<!--    <button onclick="save()">save</button>-->
+  </p>
+  <table id="musicArrayTable">
+    <tr id="trm0"></tr>
+    <tr id="trm1"></tr>
+    <tr id="trm2"></tr>
+  </table>
+</div>
+</div>
+
+<!-- soundFunctions -->
+<script>
+  let stateArray = []; //多分使わない
+  let noteArray = []; //1小節
+  let mainNoteArray = []; //全体が入るやつ
+  let mainNoteArray2 = []; //バラして入れるやつ
+  let receivedScoreList; //DBから拾ってきた奴が入る
+
+  window.onload = () => {
+    init();
+    loadScoreList(soundArrayTableDefine);
+    console.log(<%-sessionId%>);
+  }
+</script>
+
+<!-- 左セレクタテーブルの定義 -->
+<script>
+  const init = () => {
+    noteArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    mainNoteArray = [
+      "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+      "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+      "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+    ];
+
+    //table define
+    for (let x=0; x<4; x++){
+      const tr = document.getElementById('tr'+x);
+      for (let y=0; y<4; y++){
+        const xy = x.toString()+y.toString();
+        const td = document.createElement('td');
+        td.setAttribute('id', xy);
+
+        const sel = document.createElement('select');
+        sel.setAttribute('id', 's'+xy);
+        for (let z=0; z<freqValList.length; z++){
+          const op = document.createElement('option');
+          op.value = freqValList[z];
+          op.text = freqNameList[z];
+          if (freqValList[z] === 'c4') {op.setAttribute("selected", "selected");}
+          sel.appendChild(op);
+        }
+        sel.style.visibility = 'hidden';
+        sel.setAttribute('onchange', 'setNote(id)');
+
+        const chk = document.createElement('input');
+        chk.setAttribute('type', 'checkbox');
+        chk.setAttribute('id', 'c'+xy);
+        const sId = 's'+xy;
+        chk.setAttribute('onchange', 'setVisibility(\''+sId+'\')');
+
+        td.appendChild(chk);
+        td.appendChild(sel);
+        tr.appendChild(td);
+      }
+    }
+  }
+</script>
+<!-- 音セレクタの表示/非表示 -->
+<script>
+  const setVisibility = (id) => {
+    // console.log(id.toString());
+    const target = document.getElementById(id);
+    let idx;
+    if (id.slice(0,1)=='s'){
+      idx = idToIdx[id.slice(1)];
+    }else{
+      idx = idToIdx2[id.slice(1)];
+    }
+
+    if (target.style.visibility === 'visible'){
+      target.style.visibility = 'hidden';
+      if(id.slice(0,1)=='s'){
+        noteArray[idx] = 0;
+      }else{
+        mainNoteArray[idx] = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+        console.log(mainNoteArray);
+      }
+    }else{
+      target.style.visibility = 'visible';
+      if(id.slice(0,1)=='s'){
+        noteArray[idx] = freqKV['c4'];
+      }else{
+        mainNoteArray[idx] = target.value;
+        console.log(mainNoteArray);
+      }
+    }
+  }
+</script>
+<!--周波数をnoteArrayにセット-->
+<script>
+  const setNote = (id) => {
+    const idx = idToIdx[id.slice(1)];
+    const item = document.getElementById(id);
+    noteArray[idx] = freqKV[freqValList[item.selectedIndex]];
+  }
+
+  const setNote2 = (id) => {
+    const idx = idToIdx2[id.slice(1)];
+    const item = document.getElementById(id);
+    mainNoteArray[idx] = item.value;
+    console.log(id);
+    console.log(idx);
+    console.log(item);
+    console.log(mainNoteArray);
+  }
+</script>
+<!-- 再生ボタン関連 -->
+<script>
+  const start = () => {
+    const bpm = document.getElementById('bpm').value;
+    const noteLen = (60*4/bpm/16)*1000;
+
+    let i = 1;
+    noteArray.forEach(function (item) {
+      sleep(noteLen, i*noteLen, playSound, noteLen, item);
+      i++;
+    })
+  }
+  const start2 = () => {
+    const bpm = document.getElementById('bpm2').value;
+    const noteLen = (60*4/bpm/16)*1000;
+
+    mainNoteArray.forEach(function (item) {
+      let hoge = item.split(',');
+      hoge.forEach(function (it) {
+        mainNoteArray2.push(it);
+      })
+    })
+    for (let i=mainNoteArray2.length-1;; i--){
+      if (mainNoteArray2[i]!=="0"){break;}
+      mainNoteArray2.pop();
+    }
+
+    let i = 1;
+    mainNoteArray2.forEach(function (item) {
+      sleep(noteLen, i*noteLen, playSound, noteLen, item);
+      i++;
+    })
+  }
+  const playSound = (time, freq) => {
+    let ctx = new AudioContext();
+    let osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    osc.connect(ctx.destination);
+
+    osc.start(0);
+    osc.stop(time*0.001);
+    osc = null;
+    ctx = null;
+  };
+
+  const sleep = function(x, n, callback, time, freq){
+    let cnt = 0;
+    const id = setInterval(function () {
+      cnt += x;
+      if (cnt >= n){
+        clearInterval(id);
+        if (callback) callback(time, freq);
+      }
+    }, x);
+  }
+</script>
+
+
+
+
+<!-- 右テーブルの定義 -->
+<script>
+  const soundArrayTableDefine = (list)=> {
+    const table = document.getElementById('musicArrayTable');
+
+    for (let x=0; x<3; x++){
+      const tr = document.getElementById('trm'+x);
+      for (let y=0; y<10; y++){
+        const xy = x.toString()+y.toString();
+        const td = document.createElement('td');
+        const idStr = 't'+xy;
+        const sId = 'm'+xy;
+        td.setAttribute('id', idStr);
+
+        const sel = document.createElement('select');
+        sel.setAttribute('id', 'm'+xy);
+        // console.log(list);
+        list.forEach(function (listItem) {
+          const op = document.createElement('option');
+          op.value = listItem.score.split(',');//ここで取得値を[]にしようとした
+          op.text = listItem.title;
+          sel.appendChild(op);
+        });
+
+
+        sel.style.visibility = 'hidden';
+        sel.setAttribute('onchange', 'setNote2(\''+sId+'\')'); //ここメイン用setNoteに変える
+
+        const chk = document.createElement('input');
+        chk.setAttribute('type', 'checkbox');
+        chk.setAttribute('id', 'h'+xy);
+        chk.setAttribute('onchange', 'setVisibility(\''+sId+'\')');
+
+        td.appendChild(chk);
+        td.appendChild(sel);
+        tr.appendChild(td);
+      }
+    }
+  }
+
+  const createListElement = (list) => { //↓の関数から受け取った値を元にselectエレメントを作って返す
+    const result = document.createElement('select');
+    list.forEach(function (listItem) {
+      const child = document.createElement('option');
+      child.value = listItem.score;
+      child.innerText = listItem.title;
+      result.appendChild(child);
+    });
+
+    result.size = 5;
+    return result;
+  }
+  function loadScoreList(callback) { //ここでリクエストを飛ばす、JSONで帰ってきた値を↑の関数に渡す
+    const XHR = new XMLHttpRequest();
+    XHR.open('POST', 'localhost:3000/getScoreList');
+    XHR.send();
+    return callback(<%- JSON.stringify(scoreList) %>);
+  }
+</script>
+
+<!--resources-->
+<script>
+  const idToIdx = {
+    "00": 0, "01": 1, "02": 2, "03": 3,
+    "10": 4, "11": 5, "12": 6, "13": 7,
+    "20": 8, "21": 9, "22":10, "23":11,
+    "30":12, "31":13, "32":14, "33":15
+  };
+
+  const idToIdx2 = {
+    "00":  0, "01":  1, "02":  2, "03":  3, "04":  4, "05":  5, "06":  6, "07":  7, "08":  8, "09": 9,
+    "10": 10, "11": 11, "12": 12, "13": 13, "14": 14, "15": 15, "16": 16, "17": 17, "18": 18, "19":19,
+    "20": 20, "21": 21, "22": 22, "23": 23, "24": 24, "25": 25, "26": 26, "27": 27, "28": 28, "29":29
+  }
+
+  const freqValList = [
+    "g5", "g_5",
+    "f5", "f_5",
+    "e5",
+    "d5", "d_5",
+    "c5", "c_5",
+    "b5",
+    "a5", "a_5",
+    "g4", "g_4",
+    "f4", "f_4",
+    "e4",
+    "d4", "d_4",
+    "c4", "c_4",
+    "b4",
+    "a4", "a_4",
+    "g3", "g_3",
+    "f3", "f_3",
+    "e3",
+    "d3", "d_3",
+    "c3", "c_3",
+    "b3",
+    "a3", "a_3"
+  ];
+  const freqNameList = [
+    "g5", "g#5",
+    "f5", "f#5",
+    "e5",
+    "d5", "d#5",
+    "c5", "c#5",
+    "b5",
+    "a5", "a#5",
+    "g4", "g#4",
+    "f4", "f#4",
+    "e4",
+    "d4", "d#4",
+    "c4", "c#4",
+    "b4",
+    "a4", "a#4",
+    "g3", "g#3",
+    "f3", "f#3",
+    "e3",
+    "d3", "d#3",
+    "c3", "c#3",
+    "b3",
+    "a3", "a#3"
+  ];
+  const freqKV = {
+    "a3":220,
+    "a_3":233,
+    "b3":246,
+    "c3":261,
+    "c_3":277,
+    "d3":293,
+    "d_3":311,
+    "e3":329,
+    "f3":349,
+    "f_3":369,
+    "g3":391,
+    "g_3":415,
+    "a4":440,
+    "a_4":466,
+    "b4":493,
+    "c4":523,
+    "c_4":554,
+    "d4":587,
+    "d_4":622,
+    "e4":659,
+    "f4":698,
+    "f_4":739,
+    "g4":783,
+    "g_4":830,
+    "a5":880,
+    "a_5":932,
+    "b5":987,
+    "c5":1046,
+    "c_5":1108,
+    "d5":1174,
+    "d_5":1244,
+    "e5":1318,
+    "f5":1396,
+    "f_5":1479,
+    "g5":1567,
+    "g_5":1661
+  };
+
+</script>
+
+
+
+</body>
+</html>
